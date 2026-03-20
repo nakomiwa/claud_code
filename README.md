@@ -6,12 +6,13 @@ LangGraph と Claude (claude-sonnet-4-6) を使ったシンプルなチャット
 
 ```
 .
-├── main.py              # CLI エントリーポイント
+├── databricks_notebook.py   # Databricks Notebook 用（メイン）
+├── main.py                  # ローカル CLI 用
 ├── chatbot/
-│   ├── graph.py         # LangGraph グラフ定義（コア）
-│   └── config.py        # モデル名・設定定数
-├── requirements.txt
-└── .env.example
+│   ├── graph.py             # LangGraph グラフ定義（コア）
+│   └── config.py            # モデル名・設定定数
+├── requirements.txt         # ローカル実行用の依存関係
+└── .env.example             # ローカル実行用 APIキーテンプレート
 ```
 
 ## LangGraph の主要概念
@@ -30,45 +31,68 @@ LangGraph と Claude (claude-sonnet-4-6) を使ったシンプルなチャット
 START --> chat_node --> END
 ```
 
-## セットアップ
+---
+
+## Databricks での実行（推奨）
+
+### 1. Databricks Secret に API キーを登録
+
+Databricks CLI から実行するか、UI の Secret Management で設定します。
 
 ```bash
-# 依存関係のインストール
-pip install -r requirements.txt
+# スコープの作成（初回のみ）
+databricks secrets create-scope --scope YOUR_SECRET_SCOPE
 
-# APIキーの設定
-cp .env.example .env
-# .env を編集して ANTHROPIC_API_KEY を設定
+# Anthropic API キーの登録
+databricks secrets put --scope YOUR_SECRET_SCOPE --key anthropic-api-key
 ```
 
-## 実行
+### 2. Notebook のインポート
+
+`databricks_notebook.py` を Databricks Workspace にインポートします。
+
+- Workspace → Import → `databricks_notebook.py` をアップロード
+- または Repos を使って Git リポジトリをそのままクローン
+
+### 3. スコープ名の設定
+
+Notebook の設定セルの `DATABRICKS_SECRET_SCOPE` を実際のスコープ名に変更します。
+
+```python
+DATABRICKS_SECRET_SCOPE = "YOUR_SECRET_SCOPE"  # ← 変更
+```
+
+### 4. クラスターにアタッチして実行
+
+クラスターをアタッチし、上から順にセルを実行します。
+`%pip install` セルが依存関係を自動インストールします。
+
+### 使い方（Notebook内）
+
+```python
+# メッセージを送る
+response = chat("LangGraphとは何ですか？")
+print(response)
+
+# 会話履歴を表示
+show_history()
+
+# 履歴をリセット
+reset_conversation()
+```
+
+---
+
+## ローカルでの実行
 
 ```bash
+pip install -r requirements.txt
+cp .env.example .env
+# .env を編集して ANTHROPIC_API_KEY を設定
 python main.py
 ```
 
-### 実行例
-
-```
-LangGraph チャットボット (claude-sonnet-4-6)
-'quit' で終了、'history' で会話履歴を表示
-
-あなた: LangGraphとは何ですか？
-Claude: LangGraphはLangChain上に構築されたライブラリで、LLMを使った
-        ステートフルなマルチアクターアプリケーションを構築するためのものです...
-
-あなた: 一言でまとめると？
-Claude: LLMワークフローをグラフとして定義し、状態管理を組み込んだライブラリです。
-
-あなた: history
-  [あなた] LangGraphとは何ですか？
-  [Claude] LangGraphはLangChain上に...
-  [あなた] 一言でまとめると？
-  [Claude] LLMワークフローをグラフとして...
-
-あなた: quit
-さようなら！
-```
+---
 
 ## 次のステップ
 
