@@ -45,7 +45,11 @@ print(f"API Key 先頭 : {openai_api_key[:8]}... (全{len(openai_api_key)}文字
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## 2. Databricks REST API でシークレットを登録
+# MAGIC ## 2. シークレットの登録方法
+# MAGIC
+# MAGIC 以下の **A（推奨）** または **B（Databricks CLI）** のいずれかを実行してください。
+# MAGIC
+# MAGIC ### 方法 A: Databricks REST API（推奨・CLI 不要）
 # MAGIC
 # MAGIC `dbutils.secrets` は読み取り専用のため、登録には Databricks REST API を使用します。
 
@@ -100,6 +104,46 @@ if resp.status_code == 200:
     print(f"✓ シークレット '{secret_key_name}' を Scope '{secret_scope}' に登録しました。")
 else:
     raise Exception(f"シークレット登録に失敗しました: {resp.status_code} {resp.text}")
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ### 方法 B: Databricks CLI を使う場合（%sh）
+# MAGIC
+# MAGIC Databricks CLI がクラスターにインストールされている場合のみ使用してください。
+# MAGIC
+# MAGIC > **注意**: 方法 A を実行済みの場合は、このセルをスキップしてください。
+
+# COMMAND ----------
+
+# MAGIC %sh
+# MAGIC # ===== ここを自分の値に置き換える =====
+# MAGIC DATABRICKS_HOST="https://<your-workspace>.azuredatabricks.net"  # ← Azure DatabricksのワークスペースURL
+# MAGIC DATABRICKS_TOKEN="dapi..."                                       # ← Personal Access Token（Settings > User Settings > Access Tokens）
+# MAGIC OPENAI_API_KEY="sk-proj-..."                                     # ← OpenAI APIキー
+# MAGIC # ====================================
+# MAGIC
+# MAGIC # CLI設定ファイルを生成
+# MAGIC cat > ~/.databrickscfg << EOF
+# MAGIC [DEFAULT]
+# MAGIC host = ${DATABRICKS_HOST}
+# MAGIC token = ${DATABRICKS_TOKEN}
+# MAGIC EOF
+# MAGIC echo "✅ Databricks CLI設定完了"
+# MAGIC
+# MAGIC # スコープ作成（既存の場合はスキップ）
+# MAGIC databricks secrets create-scope --scope openai-secrets 2>/dev/null && \
+# MAGIC   echo "✅ Secret Scope 'openai-secrets' を作成しました。" || \
+# MAGIC   echo "⚠️ Secret Scope 'openai-secrets' は既に存在します（スキップ）。"
+# MAGIC
+# MAGIC # シークレット登録
+# MAGIC databricks secrets put --scope openai-secrets --key openai-api-key --string-value "${OPENAI_API_KEY}"
+# MAGIC echo "✅ OpenAI APIキー登録完了"
+# MAGIC
+# MAGIC # 登録確認
+# MAGIC echo ""
+# MAGIC echo "📋 登録されたシークレット:"
+# MAGIC databricks secrets list --scope openai-secrets
 
 # COMMAND ----------
 
