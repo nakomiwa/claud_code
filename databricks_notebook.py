@@ -35,7 +35,7 @@ from langgraph.graph import StateGraph, MessagesState, START, END
 # COMMAND ----------
 
 # ---- 設定 ----
-DATABRICKS_SECRET_SCOPE = "YOUR_SECRET_SCOPE"  # ← 変更してください
+DATABRICKS_SECRET_SCOPE = "openai-secrets"  # setup_openai_secret.py で設定したスコープ名
 DATABRICKS_SECRET_KEY   = "openai-api-key"
 
 MODEL_NAME    = "gpt-5-mini"
