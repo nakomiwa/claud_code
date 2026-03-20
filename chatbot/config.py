@@ -1,4 +1,4 @@
-MODEL_NAME = "gpt-4o"
+MODEL_NAME = "gpt-5-mini"
 MAX_TOKENS = 1024
 SYSTEM_PROMPT = "あなたは親切なアシスタントです。簡潔でわかりやすい返答をしてください。"
 

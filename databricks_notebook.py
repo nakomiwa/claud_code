@@ -4,7 +4,7 @@
 # MAGIC %md
 # MAGIC # LangGraph チャットボット on Databricks
 # MAGIC
-# MAGIC LangGraph と OpenAI (gpt-4o) を使ったチャットボットのデモです。
+# MAGIC LangGraph と OpenAI (gpt-5-mini) を使ったチャットボットのデモです。
 # MAGIC
 # MAGIC ## 事前準備
 # MAGIC Databricks Secret に OpenAI API キーを登録してください。
@@ -38,7 +38,7 @@ from langgraph.graph import StateGraph, MessagesState, START, END
 DATABRICKS_SECRET_SCOPE = "YOUR_SECRET_SCOPE"  # ← 変更してください
 DATABRICKS_SECRET_KEY   = "openai-api-key"
 
-MODEL_NAME    = "gpt-4o"
+MODEL_NAME    = "gpt-5-mini"
 MAX_TOKENS    = 1024
 SYSTEM_PROMPT = "あなたは親切なアシスタントです。簡潔でわかりやすい返答をしてください。"
 

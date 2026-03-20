@@ -25,7 +25,7 @@ def main() -> None:
             ".env.example を .env にコピーして API キーを設定してください。"
         )
 
-    print("LangGraph チャットボット (gpt-4o)")
+    print("LangGraph チャットボット (gpt-5-mini)")
     print("'quit' で終了、'history' で会話履歴を表示\n")
 
     graph = build_graph()
