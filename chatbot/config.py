@@ -1,8 +1,9 @@
-MODEL_NAME = "claude-sonnet-4-6"
+MODEL_NAME = "gpt-4o"
 MAX_TOKENS = 1024
 SYSTEM_PROMPT = "あなたは親切なアシスタントです。簡潔でわかりやすい返答をしてください。"
 
 # Databricks Secrets の設定
-# dbutils.secrets.put(scope="YOUR_SCOPE", key="anthropic-api-key", string_value="sk-ant-...")
+# databricks secrets create-scope --scope YOUR_SECRET_SCOPE
+# databricks secrets put --scope YOUR_SECRET_SCOPE --key openai-api-key
 DATABRICKS_SECRET_SCOPE = "YOUR_SECRET_SCOPE"   # 作成したスコープ名に変更
-DATABRICKS_SECRET_KEY = "anthropic-api-key"      # シークレットのキー名
+DATABRICKS_SECRET_KEY = "openai-api-key"

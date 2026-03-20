@@ -1,29 +1,29 @@
 # Databricks notebook source
+# Workspace: https://adb-7405606053000173.13.azuredatabricks.net
 
 # MAGIC %md
 # MAGIC # LangGraph チャットボット on Databricks
 # MAGIC
-# MAGIC LangGraph と Claude (claude-sonnet-4-6) を使ったチャットボットのデモです。
+# MAGIC LangGraph と OpenAI (gpt-4o) を使ったチャットボットのデモです。
 # MAGIC
 # MAGIC ## 事前準備
-# MAGIC 1. Databricks Secret に Anthropic API キーを登録してください
-# MAGIC    ```
-# MAGIC    databricks secrets create-scope --scope YOUR_SECRET_SCOPE
-# MAGIC    databricks secrets put --scope YOUR_SECRET_SCOPE --key anthropic-api-key
-# MAGIC    ```
-# MAGIC 2. 下の `DATABRICKS_SECRET_SCOPE` を実際のスコープ名に変更してください
+# MAGIC Databricks Secret に OpenAI API キーを登録してください。
+# MAGIC ```
+# MAGIC databricks secrets create-scope --scope YOUR_SECRET_SCOPE
+# MAGIC databricks secrets put --scope YOUR_SECRET_SCOPE --key openai-api-key
+# MAGIC ```
+# MAGIC 下の `DATABRICKS_SECRET_SCOPE` を実際のスコープ名に変更してください。
 
 # COMMAND ----------
 
-# MAGIC %pip install langgraph langchain-anthropic langchain-core
+# MAGIC %pip install langgraph langchain-openai langchain-core
 dbutils.library.restartPython()
 
 # COMMAND ----------
 
 import os
-from langchain_core.messages import HumanMessage, AIMessage
-from langchain_anthropic import ChatAnthropic
-from langchain_core.messages import SystemMessage
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+from langchain_openai import ChatOpenAI
 from langgraph.graph import StateGraph, MessagesState, START, END
 
 # COMMAND ----------
@@ -36,14 +36,14 @@ from langgraph.graph import StateGraph, MessagesState, START, END
 
 # ---- 設定 ----
 DATABRICKS_SECRET_SCOPE = "YOUR_SECRET_SCOPE"  # ← 変更してください
-DATABRICKS_SECRET_KEY   = "anthropic-api-key"
+DATABRICKS_SECRET_KEY   = "openai-api-key"
 
-MODEL_NAME   = "claude-sonnet-4-6"
-MAX_TOKENS   = 1024
+MODEL_NAME    = "gpt-4o"
+MAX_TOKENS    = 1024
 SYSTEM_PROMPT = "あなたは親切なアシスタントです。簡潔でわかりやすい返答をしてください。"
 
-# Databricks Secrets から Anthropic API キーを取得して環境変数に設定
-os.environ["ANTHROPIC_API_KEY"] = dbutils.secrets.get(
+# Databricks Secrets から OpenAI API キーを取得して環境変数に設定
+os.environ["OPENAI_API_KEY"] = dbutils.secrets.get(
     scope=DATABRICKS_SECRET_SCOPE,
     key=DATABRICKS_SECRET_KEY
 )
@@ -64,14 +64,12 @@ print("API キーを Databricks Secrets から取得しました。")
 def build_graph():
     """LangGraph の会話グラフを構築してコンパイルする。"""
 
-    llm = ChatAnthropic(model=MODEL_NAME, max_tokens=MAX_TOKENS)
+    llm = ChatOpenAI(model=MODEL_NAME, max_tokens=MAX_TOKENS)
 
     def chat_node(state: MessagesState) -> dict:
         # 毎回 SystemMessage を先頭に付けてコンテキストを維持
         messages = [SystemMessage(content=SYSTEM_PROMPT)] + state["messages"]
         response = llm.invoke(messages)
-        # {"messages": [response]} を返すと add_messages reducer が
-        # 既存リストの末尾に response を追記する
         return {"messages": [response]}
 
     builder = StateGraph(MessagesState)
@@ -99,7 +97,7 @@ conversation = []
 
 def chat(user_message: str) -> str:
     """
-    ユーザーメッセージを送り、Claude の返答を返す。
+    ユーザーメッセージを送り、GPT-4o の返答を返す。
     会話履歴は自動的に蓄積される。
     """
     global conversation
@@ -120,7 +118,7 @@ def show_history():
         print("(まだメッセージはありません)")
         return
     for msg in conversation:
-        role = "あなた" if isinstance(msg, HumanMessage) else "Claude"
+        role = "あなた" if isinstance(msg, HumanMessage) else "GPT-4o"
         print(f"[{role}] {msg.content}\n")
 
 # COMMAND ----------
@@ -134,13 +132,13 @@ def show_history():
 
 # 1回目の質問
 response = chat("LangGraphとは何ですか？")
-print(f"Claude: {response}")
+print(f"GPT-4o: {response}")
 
 # COMMAND ----------
 
 # 2回目（前の会話を踏まえた質問）
 response = chat("一言でまとめると？")
-print(f"Claude: {response}")
+print(f"GPT-4o: {response}")
 
 # COMMAND ----------
 

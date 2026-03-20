@@ -19,13 +19,13 @@ from chatbot.graph import build_graph
 def main() -> None:
     load_dotenv()  # .env ファイルを読み込んで環境変数に設定
 
-    if not os.getenv("ANTHROPIC_API_KEY"):
+    if not os.getenv("OPENAI_API_KEY"):
         raise EnvironmentError(
-            "ANTHROPIC_API_KEY が設定されていません。\n"
+            "OPENAI_API_KEY が設定されていません。\n"
             ".env.example を .env にコピーして API キーを設定してください。"
         )
 
-    print("LangGraph チャットボット (claude-sonnet-4-6)")
+    print("LangGraph チャットボット (gpt-4o)")
     print("'quit' で終了、'history' で会話履歴を表示\n")
 
     graph = build_graph()
@@ -52,7 +52,7 @@ def main() -> None:
             if not conversation:
                 print("  (まだメッセージはありません)")
             for msg in conversation:
-                role = "あなた" if msg.type == "human" else "Claude"
+                role = "あなた" if msg.type == "human" else "GPT-4o"
                 print(f"  [{role}] {msg.content}")
             continue
 
@@ -63,9 +63,9 @@ def main() -> None:
         result = graph.invoke({"messages": conversation})
 
         # result["messages"] には全メッセージが含まれる
-        # 最後のメッセージが Claude の返答
+        # 最後のメッセージが GPT-4o の返答
         ai_message = result["messages"][-1]
-        print(f"Claude: {ai_message.content}\n")
+        print(f"GPT-4o: {ai_message.content}\n")
 
         # ローカルの履歴をグラフの出力で更新
         conversation = result["messages"]

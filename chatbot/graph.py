@@ -9,7 +9,7 @@ add_messages reducer により、ノードが返す新しいメッセージは
 リスト全体を上書きするのではなく、末尾に追記されます。
 """
 
-from langchain_anthropic import ChatAnthropic
+from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage
 from langgraph.graph import StateGraph, MessagesState, START, END
 
@@ -19,7 +19,7 @@ from chatbot.config import MODEL_NAME, MAX_TOKENS, SYSTEM_PROMPT
 def build_graph():
     """LangGraph の会話グラフを構築してコンパイルする。"""
 
-    llm = ChatAnthropic(model=MODEL_NAME, max_tokens=MAX_TOKENS)
+    llm = ChatOpenAI(model=MODEL_NAME, max_tokens=MAX_TOKENS)
 
     def chat_node(state: MessagesState) -> dict:
         messages = [SystemMessage(content=SYSTEM_PROMPT)] + state["messages"]
